@@ -10,6 +10,7 @@ const PORT = process.env.PORT || 3001;
 
 // ── Security Middleware ────────────────────────────
 app.use(helmet({ crossOriginEmbedderPolicy: false }));
+app.set('trust proxy', 1); // Trust Nginx reverse proxy
 app.use(cors({
   origin: process.env.ALLOWED_ORIGINS?.split(',') || [
     'https://tripmate.royal300.com',

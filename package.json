@@ -1,0 +1,23 @@
+{
+  "name": "travel_agency",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/royal300/tripmate.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/royal300/tripmate/issues"
+  },
+  "homepage": "https://github.com/royal300/tripmate#readme",
+  "dependencies": {
+    "ssh2": "^1.17.0"
+  }
+}

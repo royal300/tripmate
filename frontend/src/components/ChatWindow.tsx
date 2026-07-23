@@ -3,7 +3,7 @@ import { MessageBubble } from './MessageBubble';
 import { PackageCard } from './PackageCard';
 import { TypingIndicator } from './TypingIndicator';
 import { LeadCaptureForm } from './LeadCaptureForm';
-import { Package } from '../data/mockPackages';
+import type { Package } from '../data/mockPackages';
 
 export interface ChatMessage {
   id: string;

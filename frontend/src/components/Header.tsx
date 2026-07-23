@@ -1,5 +1,5 @@
 import React from 'react';
-import { PlaneTakeoff, MoreVertical, Compass } from 'lucide-react';
+import { MoreVertical, Compass } from 'lucide-react';
 
 export const Header: React.FC = () => {
   return (

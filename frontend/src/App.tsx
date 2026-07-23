@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Header } from './components/Header';
-import { ChatWindow, ChatMessage } from './components/ChatWindow';
+import { ChatWindow, type ChatMessage } from './components/ChatWindow';
 import { ChatInputBar } from './components/ChatInputBar';
 import { QuickReplyChips } from './components/QuickReplyChips';
 import { getMockResponse } from './data/mockConversation';

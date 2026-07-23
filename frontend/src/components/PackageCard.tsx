@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Package } from '../data/mockPackages';
+import type { Package } from '../data/mockPackages';
 
 interface PackageCardProps {
   packages: Package[];

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { api } from '../api';
-import { Plus, Search, Edit2, Trash2, ToggleLeft, ToggleRight, X, Save } from 'lucide-react';
+import { api, uploadImage } from '../api';
+import { Plus, Search, Edit2, Trash2, ToggleLeft, ToggleRight, X, Save, Upload, Loader2 } from 'lucide-react';
 
 const EMPTY_PKG = {
   name: '', destination: '', category: 'family', days: 5,
@@ -16,6 +16,7 @@ export default function Packages() {
   const [editPkg, setEditPkg] = useState<any | null>(null);
   const [form, setForm] = useState(EMPTY_PKG);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
 
   const fetchPackages = async () => {
@@ -41,6 +42,21 @@ export default function Packages() {
 
   const openNew = () => { setEditPkg(null); setForm(EMPTY_PKG); setShowForm(true); };
   const closeForm = () => { setShowForm(false); setEditPkg(null); setError(''); };
+
+  const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    setError('');
+    try {
+      const imageUrl = await uploadImage(file);
+      setForm(f => ({ ...f, image_url: imageUrl }));
+    } catch (err: any) {
+      setError(err.message || 'Image upload failed');
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleSave = async () => {
     setSaving(true); setError('');
@@ -147,7 +163,6 @@ export default function Packages() {
                 { label: 'Child Price (₹)', key: 'child_price', type: 'number' },
                 { label: 'Hotel Category', key: 'hotel_category' },
                 { label: 'Meals Included', key: 'meals_included' },
-                { label: 'Image URL', key: 'image_url', span: 2 },
               ].map(f => (
                 <div key={f.key} className={f.span === 2 ? 'col-span-2' : ''}>
                   <label className="text-slate-400 text-xs mb-1 block">{f.label}</label>
@@ -156,6 +171,35 @@ export default function Packages() {
                   />
                 </div>
               ))}
+
+              {/* Package Image Upload & URL */}
+              <div className="col-span-2 space-y-2">
+                <label className="text-slate-400 text-xs block font-medium">Package Image</label>
+                <div className="flex items-center gap-3">
+                  <label className={`flex-1 flex items-center justify-center gap-2 border border-dashed border-white/20 hover:border-emerald-500 bg-white/5 hover:bg-white/10 rounded-xl p-3 cursor-pointer text-slate-300 text-sm transition-all ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                    {uploading ? <Loader2 size={16} className="animate-spin text-emerald-400" /> : <Upload size={16} className="text-emerald-400" />}
+                    <span>{uploading ? 'Uploading...' : 'Upload Image File'}</span>
+                    <input type="file" accept="image/*" onChange={handleImageFileChange} className="hidden" />
+                  </label>
+                </div>
+                
+                {form.image_url && (
+                  <div className="relative rounded-xl overflow-hidden border border-white/10 h-28 bg-black/40 flex items-center justify-center">
+                    <img src={form.image_url} alt="Package preview" className="w-full h-full object-cover" />
+                    <button type="button" onClick={() => setForm(f => ({ ...f, image_url: '' }))} className="absolute top-2 right-2 p-1 bg-slate-900/80 hover:bg-red-600 text-white rounded-full transition-all">
+                      <X size={14} />
+                    </button>
+                  </div>
+                )}
+
+                <div>
+                  <label className="text-slate-500 text-[11px] block mb-1">Or paste Image URL directly</label>
+                  <input type="text" {...field('image_url')} placeholder="https://..."
+                    className="w-full bg-white/5 border border-white/10 text-white rounded-lg py-1.5 px-3 text-xs outline-none focus:border-emerald-500"
+                  />
+                </div>
+              </div>
+
               {[{ label: 'Category', key: 'category', opts: ['honeymoon','family','adventure','pilgrimage','budget','luxury','group'] },
                 { label: 'Food Preference', key: 'food_preference', opts: ['veg','non-veg','any'] },
                 { label: 'Status', key: 'status', opts: ['active','inactive'] }].map(f => (
@@ -177,7 +221,7 @@ export default function Packages() {
               </div>
             ))}
 
-            <button onClick={handleSave} disabled={saving}
+            <button onClick={handleSave} disabled={saving || uploading}
               className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-50">
               <Save size={16}/> {saving ? 'Saving...' : 'Save Package'}
             </button>
@@ -187,3 +231,4 @@ export default function Packages() {
     </div>
   );
 }
+

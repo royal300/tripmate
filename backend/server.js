@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const path = require('path');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
@@ -38,6 +39,10 @@ const adminLimiter = rateLimit({
   message: { error: 'Rate limit exceeded.' },
 });
 
+// ── Static File Serving (uploaded images) ────────────
+const UPLOADS_DIR = path.join(__dirname, '../uploads');
+app.use('/uploads', express.static(UPLOADS_DIR));
+
 // ── Routes ────────────────────────────────────────
 app.use('/api/chat', chatLimiter, require('./routes/chat'));
 app.use('/api/auth', adminLimiter, require('./routes/auth'));
@@ -45,6 +50,7 @@ app.use('/api/admin/leads', adminLimiter, require('./routes/leads'));
 app.use('/api/admin/packages', adminLimiter, require('./routes/packages'));
 app.use('/api/admin/dashboard', adminLimiter, require('./routes/dashboard'));
 app.use('/api/admin/settings', adminLimiter, require('./routes/settings'));
+app.use('/api/admin/upload', adminLimiter, require('./routes/upload'));
 app.use('/api/packages', require('./routes/packages')); // public active packages
 
 // ── Health Check ──────────────────────────────────

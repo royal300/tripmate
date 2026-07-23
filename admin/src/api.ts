@@ -24,6 +24,23 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   return data;
 }
 
+export async function uploadImage(file: File): Promise<string> {
+  const token = getToken();
+  const formData = new FormData();
+  formData.append('image', file);
+
+  const res = await fetch(`${API_BASE}/admin/upload/image`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData,
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Upload failed');
+  // Return full absolute URL (e.g. https://tripmate.royal300.com/uploads/pkg_xxx.jpg)
+  const base = API_BASE.replace('/api', '');
+  return base + data.url;
+}
+
 export const api = {
   // Auth
   login: (email: string, password: string) =>

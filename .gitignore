@@ -1,2 +1,5 @@
 node_modules/
 setup_vps.js
+run_certbot.js
+backend/.env
+admin/.env

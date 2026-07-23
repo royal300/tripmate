@@ -51,22 +51,35 @@ export async function sendChatMessage(
       if (done) break;
 
       buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n');
-      buffer = lines.pop() || '';
+      const blocks = buffer.split('\n\n');
+      buffer = blocks.pop() || '';
 
-      for (const line of lines) {
-        if (line.startsWith('event: ')) {
-          const eventType = line.slice(7).trim();
-          const dataLine = lines[lines.indexOf(line) + 1] || '';
-          if (!dataLine.startsWith('data: ')) continue;
-          const data = JSON.parse(dataLine.slice(6));
+      for (const block of blocks) {
+        if (!block.trim()) continue;
+        const lines = block.split('\n');
+        let eventType = '';
+        let dataStr = '';
 
-          if (eventType === 'token') {
-            callbacks.onToken(data.text);
-          } else if (eventType === 'done') {
-            callbacks.onDone(data as ChatResponseDone);
-          } else if (eventType === 'error') {
-            callbacks.onError(data.message);
+        for (const line of lines) {
+          if (line.startsWith('event: ')) {
+            eventType = line.slice(7).trim();
+          } else if (line.startsWith('data: ')) {
+            dataStr = line.slice(6).trim();
+          }
+        }
+
+        if (eventType && dataStr) {
+          try {
+            const data = JSON.parse(dataStr);
+            if (eventType === 'token') {
+              callbacks.onToken(data.text);
+            } else if (eventType === 'done') {
+              callbacks.onDone(data as ChatResponseDone);
+            } else if (eventType === 'error') {
+              callbacks.onError(data.message);
+            }
+          } catch (e) {
+            console.error('Failed to parse SSE event:', e);
           }
         }
       }

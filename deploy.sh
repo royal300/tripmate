@@ -1,30 +1,54 @@
 #!/bin/bash
-# deploy.sh
-# Script to automate deployment of TripMate AI to the VPS
+# ============================================================
+# TripMate AI — Full System Deployment Script
+# Usage: bash deploy.sh
+# Runs from your local machine — SSHes into VPS automatically
+# ============================================================
 
 VPS_IP="93.127.206.52"
 VPS_USER="root"
 
-echo "Deploying to VPS ($VPS_IP)..."
+echo "🚀 Deploying TripMate AI to VPS ($VPS_IP)..."
 
-# SSH and run git pull + build
 ssh $VPS_USER@$VPS_IP << 'EOF'
   set -e
-  echo "--- Starting Deployment ---"
+  echo "--- Starting TripMate Deployment ---"
   
   cd /var/www/tripmate
   git pull origin main
-  
-  cd frontend
-  # Try to load nvm if available
-  if [ -s "$HOME/.nvm/nvm.sh" ]; then
-    . "$HOME/.nvm/nvm.sh"
-  fi
-  
+  echo "✓ Code pulled from GitHub"
+
+  # Backend
+  cd /var/www/tripmate/backend
+  npm install --omit=dev
+  echo "✓ Backend deps installed"
+
+  # Frontend
+  cd /var/www/tripmate/frontend
   npm install
   npm run build
-  
-  echo "--- Deployment Complete ---"
+  echo "✓ Frontend built"
+
+  # Admin panel
+  cd /var/www/tripmate/admin
+  npm install
+  npm run build
+  echo "✓ Admin panel built"
+
+  # Restart backend with PM2
+  pm2 restart tripmate-backend
+  echo "✓ Backend restarted"
+
+  # Reload Nginx
+  nginx -t && systemctl reload nginx
+  echo "✓ Nginx reloaded"
+
+  echo ""
+  echo "=== Deployment Complete ==="
+  echo "  Chat UI    → https://tripmate.royal300.com"
+  echo "  Admin Panel → https://tripmate.royal300.com/admin/"
+  echo ""
+  pm2 show tripmate-backend | grep -E "status|restart|uptime"
 EOF
 
-echo "Done!"
+echo "Done! ✅"
